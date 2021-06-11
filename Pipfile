@@ -12,6 +12,8 @@ flask = "*"
 plotly = "*"
 joblib = "*"
 requests = "*"
+matplotlib = "*"
+
 
 [dev-packages]
 notebook = "*"
