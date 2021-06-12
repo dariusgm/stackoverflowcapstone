@@ -1,104 +1,70 @@
 import os
 import pandas as pd
 from config import config
+import json
+import csv
 
-# Stolen from myself: https://github.com/dariusgm/stackoverflow2020/blob/main/Blog.ipynb
 
-def to_list(elements) -> list:
+def convert_to_json_by_column(input_path:str, output_path:str, column:str)-> None:
     '''
-    Return a list of elements that where separated by ";"
-
-    :param elements: the (potencial) elements to convert to a list, can be (str) or (np.nan)
-    :returns: (list[str]) list of elements with 0 or more elements
+    Convert the content to several json files, splitted by the column name provided.
     
-    Example:
-    >>> import numpy as np; to_list(np.nan)
-    []
-    
-    >>> to_list("c++;c#")
-    ["c++", "c#"]
     '''
 
-    if type(elements) != str: # assuming nan
-        return []
-    else:
-        return elements.split(";")
-    
-
-
-def df_to_features(df: pd.DataFrame, column: str) -> list:
+def convert_to_json(input_path: str, output_path:str, leave_columns) -> None:
     '''
-    Explode a column of a pd.DataFrame containing several features
-    
-    :param df: (pd.DataFrame) DataFrame that have the column to explode
-    :param column: (str) The name of the column with the values to explode
-    
-    :returns: (list[dict]) A list of dicts that have a true value for a particular line
-    
-    Example:
-    >>> df_to_features(pd.DataFrame([{'a': 'b;c'}]), 'a')
-    [{'a_b': 1, 'a_c': 1}]
+    Convert the content of a csv file to a json, creating a new column for each value found.
     '''
-    
-    records = []
-    for index, row in df.iterrows():
-        line = {}
-        elements = to_list(row[column])
-        if len(elements)>0:
-            for e in elements:
-                # comparing to original code, I add here the original column name,
-                # preventing collisions with Yes / No Answers
-                line[f"{column}_{e}"] = 1
-                    
-        records.append(line)
-        
-    return records
+    process_cols = {}
+    with open(output_path, 'wt') as output_file:
+        with open(input_path, 'rt') as csvfile:
+            file = csv.reader(csvfile, delimiter=',')
+            for line_index, elements in enumerate(file) :
+                if line_index == 0:
+                    process_cols = extract_header(elements, leave_columns)
+                    continue
+                else:
+                    result_line = process_data(elements, process_cols)
 
+                output_file.write(json.dumps(result_line) + '\n')
+                        
 
-def df_extract_features(df: pd.DataFrame, column: str) -> pd.DataFrame:
-    '''
-    Extract features of a particular column and returns the filled pd.DataFrame back
-    
-    :param df: (pd.DataFrame) The DataFrame with the data to be extracted
-    :param column: (str) The column with the data to extract
-    :returns: pd.DataFrame with feature columns, filled missing values with 0 
-    
-    Example:
-    >>> df_extract_features(pd.DataFrame([{'a': 'b;c'}, {'a': 'c'}]), 'a')
-    pd.DataFrame([{'b': 1.0, 'c': 1}, {'b': 0.0, 'c': 1}])
-    '''
-    return pd.DataFrame(df_to_features(df, column)).fillna(0.)
+def process_data(elements:list, process_cols:dict) -> dict:
+    result_line = {}
+    for column_index, e in enumerate(elements):
+        column_meta_data = process_cols[column_index] 
+        action = column_meta_data['action'] 
+        name = column_meta_data['name']
+        if action == 'explode':
+            key = f"{name}_{e}"
+            result_line[key] = 1
+        elif action == 'leave':
+            key = f"{name}"
+            result_line[key] = 1
+            
+    return result_line
 
+def extract_header(elements:list, leave_cols:list):
+    process_cols = {}
+    for column_index, e in enumerate(elements):
+        if e in leave_cols:
+            process_cols[column_index] = {'action': 'leave', 'name': e}
+        else:
+            process_cols[column_index] = {'action': 'explode', 'name': e}
+            
+    return process_cols
 
-def calculate_and_save(df: pd.DataFrame, column:str,  year:int) -> pd.DataFrame:
-    '''
-    Calculate features and cache result. Further calls will return the precalculated results
-    
-    :param df: (pd.DataFrame) The DataFrame with the data to be processed
-    :param column: (str) The column with the data to process
-    :param year: (int) the year of the data, used as cache key
-    :returns: go.Figure, ready to use plotly figure
-    '''
-    
-    cache_key = f"{year}_{column}.csv"
-    cache_path = os.path.join('cache', cache_key)
-    if os.path.exists(cache_path):
-        return pd.read_csv(cache_path).set_index('id')
-    df = df_extract_features(df, column)
-    df.to_csv(cache_path, index_label='id')
-    return df
 
 def main():
     os.makedirs('cache', exist_ok=True)
     for element in config:
-        if 'columns' in element:
+        if 'leave_columns' in element:
             year = element['year']
             data_path = element['data_path']
-            df = pd.read_csv(data_path, dtype=str)
-            for col in element['columns']:
-                print(f'calculating {col}')
-                calculate_and_save(df, col, year)
-                
+            json_path = element['json_path']
+            leave_columns = element['leave_columns']
+            print(data_path)
+            convert_to_json(input_path=data_path, output_path=json_path, leave_columns=leave_columns)
 
 
 
