@@ -39,8 +39,7 @@ def convert_to_json(input_path: str, output_path:str, leave_columns) -> None:
                 else:
                     # process all column, for spark
                     result_line = process_data(elements, process_cols, None)
-
-                output_file.write(json.dumps(result_line) + '\n')
+                    output_file.write(json.dumps(result_line) + '\n')
 
     return process_cols
                
@@ -51,7 +50,7 @@ def process_data(elements:list, process_cols:dict, column: str) -> dict:
         column_meta_data = process_cols[column_index] 
         action = column_meta_data['action'] 
         name = column_meta_data['name']
-        if column == None or name == column: 
+        if column == None or name == column['name']: 
             if action == 'explode':
                 key = f"{name}_{e}"
                 result_line[key] = 1
