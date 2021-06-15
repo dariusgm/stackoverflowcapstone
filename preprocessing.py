@@ -52,8 +52,15 @@ def process_data(elements:list, process_cols:dict, column: str) -> dict:
         name = column_meta_data['name']
         if column == None or name == column['name']: 
             if action == 'explode':
-                key = f"{name}_{e}"
-                result_line[key] = 1
+
+                # explode values in case of multiple possible answers
+                if ';' in e:
+                    for nested_element in e.split(';'):
+                        key = f"{name}_{nested_element}"
+                        result_line[key] = 1
+                else:
+                    key = f"{name}_{e}"
+                    result_line[key] = 1
             elif action == 'leave':
                 key = f"{name}"
                 result_line[key] = 1
