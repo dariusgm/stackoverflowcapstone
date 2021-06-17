@@ -24,7 +24,7 @@ def convert_to_json_by_column(input_path:str, output_path:str, column:str, proce
 
                 output_file.write(json.dumps(result_line) + '\n')
 
-def convert_to_json(input_path: str, output_path:str, leave_columns) -> None:
+def convert_to_json(input_path: str, output_path:str, leave_columns, numeric_columns) -> None:
     '''
     Convert the content of a csv file to a json, creating a new column for each value found.
     '''
@@ -34,7 +34,7 @@ def convert_to_json(input_path: str, output_path:str, leave_columns) -> None:
             file = csv.reader(csvfile, delimiter=',')
             for line_index, elements in enumerate(file) :
                 if line_index == 0:
-                    process_cols = extract_header(elements, leave_columns)
+                    process_cols = extract_header(elements, leave_columns, numeric_columns)
                     continue
                 else:
                     # process all column, for spark
@@ -61,17 +61,20 @@ def process_data(elements:list, process_cols:dict, column: str) -> dict:
                 else:
                     key = f"{name}_{e}"
                     result_line[key] = 1
-            elif action == 'leave':
+            elif action == 'numeric' or  action == 'leave':
                 key = f"{name}"
-                result_line[key] = 1
+                result_line[key] = e
+
             
     return result_line
 
-def extract_header(elements:list, leave_cols:list) -> dict:
+def extract_header(elements:list, leave_cols:list, numeric_cols: list) -> dict:
     process_cols = {}
     for column_index, e in enumerate(elements):
         if e in leave_cols:
             process_cols[column_index] = {'action': 'leave', 'name': e}
+        elif e in numeric_cols:
+            process_cols[column_index] = {'action': 'numeric', 'name': e}
         else:
             process_cols[column_index] = {'action': 'explode', 'name': e}
             
@@ -86,15 +89,22 @@ def main():
             data_path = element['data_path']
             json_path = element['json_path']
             leave_columns = element['leave_columns']
+            numeric_columns = element['numeric_columns']
             print(f"IN: {data_path}")
-            cols_dict = convert_to_json(input_path=data_path, output_path=json_path, leave_columns=leave_columns)
+            cols_dict = convert_to_json(
+                input_path=data_path,
+                output_path=json_path,
+                leave_columns=leave_columns,
+                numeric_columns=numeric_columns
+            )
             # process by columns for visualtisation purpose
             # and for model buliding
             for column_index, column in cols_dict.items():
                 if column['name'] not in leave_columns:
                     output_path = os.path.join("cache", f"{year}_{column['name']}.json")
-                    print(f"OUT: {output_path}")
-                    convert_to_json_by_column(data_path, output_path, column, cols_dict)
+                    if not os.path.exists(output_path):
+                        print(f"OUT: {output_path}")
+                        convert_to_json_by_column(data_path, output_path, column, cols_dict)
 
 if __name__ == '__main__':
     main()

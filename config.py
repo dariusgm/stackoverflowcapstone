@@ -69,7 +69,7 @@ config = [
         'unpack_path': os.path.join('data','unpack', '2019.zip'),
         'data_path': os.path.join('data', 'unpack', '2019.zip', 'survey_results_public.csv'),
         'json_path': os.path.join('2019.json'),
-        'leave_columns': [ 'Respondent','CompTotal','ConvertedComp']
+        # 'leave_columns': [ 'Respondent','CompTotal','ConvertedComp']
     },
     {
         'year': '2020',
@@ -78,6 +78,7 @@ config = [
         'unpack_path': os.path.join('data', 'unpack', '2020.zip'),
         'data_path': os.path.join('data', 'unpack', '2020.zip', 'survey_results_public.csv'),
         'json_path': os.path.join('2020.json'),
-        'leave_columns': ['Respondent' ,'CompTotal','ConvertedComp']
+        'numeric_columns': ['CompTotal','ConvertedComp', 'Age', 'Age1stCode', 'YearsCode', 'YearsCodePro', 'WorkWeekHrs'],
+        'leave_columns': ['Respondent']
     }
 ]
