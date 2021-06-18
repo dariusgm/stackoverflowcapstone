@@ -3,6 +3,8 @@ import pandas as pd
 from config import config
 import json
 import csv
+import numpy as np
+import math
 
 def convert_to_json_by_column(input_path:str, output_path:str, column:str, process_cols:dict)-> None:
     '''
@@ -44,20 +46,40 @@ def convert_to_json(input_path: str, output_path:str, leave_columns, numeric_col
     return process_cols
                
 
+def is_na(e):
+    if type(e) == list:
+        return all(lambda x: is_na(x), e)
+      # convert string "NA" to NA column
+    if type(e) == str and e == 'NA':
+        return True
+    # convert float na to NA column
+    elif type(e) == float and np.isna(e):
+        return True
+    return False 
+
 def process_data(elements:list, process_cols:dict, column: str) -> dict:
     result_line = {}
     for column_index, e in enumerate(elements):
         column_meta_data = process_cols[column_index] 
         action = column_meta_data['action'] 
         name = column_meta_data['name']
-        if column == None or name == column['name']: 
-            if action == 'explode':
+        if column == None or name == column['name']:
+            if (is_na(e)):
+                key = f"{name}_NA"
+                result_line[key] = 1
+                continue
 
+            elif action == 'explode':
                 # explode values in case of multiple possible answers
+                # still they can be nans
                 if ';' in e:
                     for nested_element in e.split(';'):
-                        key = f"{name}_{nested_element}"
-                        result_line[key] = 1
+                        if (is_na(e)):
+                            key = f"{name}_NA"
+                            result_line[key] = 1  
+                        else:
+                            key = f"{name}_{nested_element}"
+                            result_line[key] = 1
                 else:
                     key = f"{name}_{e}"
                     result_line[key] = 1
