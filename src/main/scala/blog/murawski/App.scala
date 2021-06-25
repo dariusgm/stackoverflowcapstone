@@ -54,6 +54,7 @@ object App {
       .read
       .json(options.inputPath)
       .filter(col(dropNAlabelColumn) === 1)
+      .withColumn(labelColumn, col(labelColumn).cast("float"))
 
     val featureColumns = preprocesing.columns.toSet.diff(Set(labelColumn)).toArray
     println("Using following feature columns:")
