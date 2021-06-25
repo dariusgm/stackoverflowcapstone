@@ -3,7 +3,7 @@ package blog.murawski
 import org.apache.spark.ml.classification.LogisticRegression
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{col, udf}
+import org.apache.spark.sql.functions.col
 import scopt.OptionParser
 case class AppOptions(inputPath: String = "", outputPath: String = "")
 
@@ -34,8 +34,8 @@ object App {
   val trainSplit = 0.7
   val testSplit = 0.2
   val hyperparameterSplit = 0.1
-
-  val toDouble = udf[Double, String]( _.toDouble)
+  val labelColumn = "ConvertedComp"
+  val dropNAlabelColumn = "ConvertedComp_NA"
 
   def main(args: Array[String]): Unit = {
     val options = AppOptions.options(args.toSeq)
@@ -53,23 +53,25 @@ object App {
     var preprocesing = spark
       .read
       .json(options.inputPath)
-      .filter(col("ConvertedComp_NA") === 1)
+      .filter(col(dropNAlabelColumn) === 1)
 
-    val featureColumns = preprocesing.columns.toSet.diff(Set("ConvertedComp")).toArray
+    val featureColumns = preprocesing.columns.toSet.diff(Set(labelColumn)).toArray
     println("Using following feature columns:")
     println(featureColumns.mkString(","))
+    println("clean column names")
+
 
     for (column <- featureColumns) {
       val cleanedName = column.replace(".", "")
-      preprocesing = preprocesing.withColumnRenamed(column, cleanedName).withColumn(cleanedName, toDouble(col(cleanedName)))
+      preprocesing = preprocesing.withColumnRenamed(column, cleanedName).withColumn(cleanedName, col(cleanedName).cast("float"))
     }
+    preprocesing = preprocesing.na.fill(0.0).cache()
+    val cleanedColumns = preprocesing.columns
 
     preprocesing.printSchema()
     preprocesing.show(10, false)
 
-
-
-    val assembler = new VectorAssembler().setInputCols(featureColumns).setOutputCol("features")
+    val assembler = new VectorAssembler().setInputCols(cleanedColumns).setOutputCol("features")
     val out = assembler.transform(preprocesing)
 
     val df = out.randomSplitAsList(Array(trainSplit, testSplit, hyperparameterSplit), seed = 42)
@@ -85,7 +87,7 @@ object App {
       .setMaxIter(10)
       .setRegParam(0.3)
       .setElasticNetParam(0.8)
-      .setLabelCol("ConvertedComp")
+      .setLabelCol(labelColumn)
       .setFeaturesCol("features")
 
     // Fit the model
