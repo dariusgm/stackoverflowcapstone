@@ -69,10 +69,18 @@
             <version>0.2.0</version>
         </dependency>
 
+        <!-- Option Parsing -->
         <dependency>
             <groupId>com.github.scopt</groupId>
             <artifactId>scopt_${scala.binary.version}</artifactId>
             <version>3.7.0</version>
+        </dependency>
+
+        <!-- Dump spark model to PMML for offline usage -->
+        <dependency>
+            <groupId>org.jpmml</groupId>
+            <artifactId>jpmml-sparkml</artifactId>
+            <version>1.4.20</version>
         </dependency>
 
         <!-- For Testing -->

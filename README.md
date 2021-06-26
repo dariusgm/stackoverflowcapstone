@@ -73,4 +73,7 @@ Or you can use ./all.sh for doing all steps in one
 ├── README.md                   - this file
 ```
 
+Stuff
+
+cat 2020.json | grep -v 'CompTotal_NA": 1,' | head -n 25 > 20
 

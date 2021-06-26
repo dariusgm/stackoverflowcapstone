@@ -1,10 +1,17 @@
 package blog.murawski
 
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.ml.classification.LogisticRegression
 import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.catalyst.ScalaReflection.Schema
 import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.jpmml.model.JAXBUtil
+import org.jpmml.sparkml.PMMLBuilder
 import scopt.OptionParser
+
+import javax.xml.transform.stream.StreamResult
+
 case class AppOptions(inputPath: String = "", outputPath: String = "")
 
 object AppOptions {
@@ -36,6 +43,8 @@ object App {
   val hyperparameterSplit = 0.1
   val labelColumn = "ConvertedComp"
   val dropNAlabelColumn = "ConvertedComp_NA"
+  val featureColumn = "features"
+
 
   def main(args: Array[String]): Unit = {
     val options = AppOptions.options(args.toSeq)
@@ -48,38 +57,70 @@ object App {
     run(options)
   }
 
-  def run(options: AppOptions)(implicit spark: SparkSession) : Unit = {
-    // spark.sparkContext.setLogLevel("ERROR")
-    var preprocesing = spark
-      .read
-      .json(options.inputPath)
-      .filter(col(dropNAlabelColumn) === 1)
-      .withColumn(labelColumn, col(labelColumn).cast("float"))
+  def export(schema : Schema, model: LogisticRegression) = {
 
-    val featureColumns = preprocesing.columns.toSet.diff(Set(labelColumn)).toArray
-    println("Using following feature columns:")
-    println(featureColumns.mkString(","))
-    println("clean column names")
+  }
+
+  def preprocessing(path: String)(implicit spark: SparkSession): DataFrame = {
+    val cacheFile = "data/2020_preprocessing.parquet"
+    val conf = spark.sparkContext.hadoopConfiguration
+    val fs = FileSystem.get(conf)
+    // skip preprocessing in case we did that already
+    if (fs.exists(new Path(cacheFile))) {
+      spark.read.parquet(cacheFile)
+    } else {
+      var preprocesing = spark
+        .read
+        .json(path)
+        .filter(col(labelColumn).isNotNull)
+        .withColumn(labelColumn, col(labelColumn).cast("float"))
+        // This is not a feature, its just the survey identifier / user
+        .drop("Respondent")
+
+      val featureColumns = preprocesing.columns.toSet.diff(Set(labelColumn)).toArray
+      println("Using following feature columns:")
+      println(featureColumns.mkString(","))
+      println("clean column names")
 
 
-    for (column <- featureColumns) {
-      val cleanedName = column.replace(".", "")
-      preprocesing = preprocesing.withColumnRenamed(column, cleanedName).withColumn(cleanedName, col(cleanedName).cast("float"))
+      for (column <- featureColumns) {
+        // Removing rejected chars for spark
+        var cleanedName = column.replace(".", "")
+        // Removing rejected chars for parquet
+        for (t <- Seq(" ", ",", ";", "{", "}", "(", ")", "\n", "\t")) {
+          cleanedName = cleanedName.replace(t, "")
+        }
+
+        preprocesing = preprocesing.withColumnRenamed(column, cleanedName).withColumn(cleanedName, col(cleanedName).cast("float"))
+      }
+      preprocesing = preprocesing.na.fill(0.0).cache()
+      preprocesing.write.parquet(cacheFile)
+      preprocesing
     }
-    preprocesing = preprocesing.na.fill(0.0).cache()
-    val cleanedColumns = preprocesing.columns
+  }
 
-    preprocesing.printSchema()
-    preprocesing.show(10, false)
+  def fitAssembler(df: DataFrame, columns: Array[String]): DataFrame = {
+    new VectorAssembler().setInputCols(columns).setOutputCol(featureColumn).transform(df)
+  }
 
-    val assembler = new VectorAssembler().setInputCols(cleanedColumns).setOutputCol("features")
-    val out = assembler.transform(preprocesing)
+  def run(options: AppOptions)(implicit spark: SparkSession): Unit = {
+    // spark.sparkContext.setLogLevel("ERROR")
+    val preprocessingDf = preprocessing(options.inputPath)
+    val cleanedColumns = preprocessingDf.columns
 
-    val df = out.randomSplitAsList(Array(trainSplit, testSplit, hyperparameterSplit), seed = 42)
+    preprocessingDf.printSchema()
+    preprocessingDf.show(10, false)
+    print(preprocessingDf.count())
+
+    val fittedAssember = fitAssembler(preprocessingDf, cleanedColumns)
+
+
+    val df = fittedAssember.randomSplitAsList(Array(trainSplit, testSplit, hyperparameterSplit), seed = 42)
     val trainDf = df.get(0).cache()
     val testDf = df.get(1).cache()
     val hyperparameterDf = df.get(2).cache()
 
+    println("total: " + preprocessingDf.count())
     println("Train: " + trainDf.count())
     println("Test: " + testDf.count())
     println("Hyperparameter: " + hyperparameterDf.count())
@@ -89,10 +130,15 @@ object App {
       .setRegParam(0.3)
       .setElasticNetParam(0.8)
       .setLabelCol(labelColumn)
-      .setFeaturesCol("features")
+      .setFeaturesCol(featureColumn)
 
     // Fit the model
     val lrModel = lr.fit(trainDf)
+
+
+
+    val pmml = new PMMLBuilder(preprocessingDf.schema, lrModel).build()
+    JAXBUtil.marshalPMML(pmml, new StreamResult(System.out))
 
     // Print the coefficients and intercept for multinomial logistic regression
     println(s"Coefficients: \n${lrModel.coefficientMatrix}")
