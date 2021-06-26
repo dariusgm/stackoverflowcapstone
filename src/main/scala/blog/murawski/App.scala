@@ -1,16 +1,11 @@
 package blog.murawski
 
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.ml.classification.LogisticRegression
+import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}
 import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.sql.catalyst.ScalaReflection.Schema
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.jpmml.model.JAXBUtil
-import org.jpmml.sparkml.PMMLBuilder
 import scopt.OptionParser
-
-import javax.xml.transform.stream.StreamResult
 
 case class AppOptions(inputPath: String = "", outputPath: String = "")
 
@@ -57,10 +52,6 @@ object App {
     run(options)
   }
 
-  def export(schema : Schema, model: LogisticRegression) = {
-
-  }
-
   def preprocessing(path: String)(implicit spark: SparkSession): DataFrame = {
     val cacheFile = "data/2020_preprocessing.parquet"
     val conf = spark.sparkContext.hadoopConfiguration
@@ -72,6 +63,7 @@ object App {
       var preprocesing = spark
         .read
         .json(path)
+        .repartition(20)
         .filter(col(labelColumn).isNotNull)
         .withColumn(labelColumn, col(labelColumn).cast("float"))
         // This is not a feature, its just the survey identifier / user
@@ -103,48 +95,12 @@ object App {
     new VectorAssembler().setInputCols(columns).setOutputCol(featureColumn).transform(df)
   }
 
-  def run(options: AppOptions)(implicit spark: SparkSession): Unit = {
-    // spark.sparkContext.setLogLevel("ERROR")
-    val preprocessingDf = preprocessing(options.inputPath)
-    val cleanedColumns = preprocessingDf.columns
-
-    preprocessingDf.printSchema()
-    preprocessingDf.show(10, false)
-    print(preprocessingDf.count())
-
-    val fittedAssember = fitAssembler(preprocessingDf, cleanedColumns)
-
-
-    val df = fittedAssember.randomSplitAsList(Array(trainSplit, testSplit, hyperparameterSplit), seed = 42)
-    val trainDf = df.get(0).cache()
-    val testDf = df.get(1).cache()
-    val hyperparameterDf = df.get(2).cache()
-
-    println("total: " + preprocessingDf.count())
-    println("Train: " + trainDf.count())
-    println("Test: " + testDf.count())
-    println("Hyperparameter: " + hyperparameterDf.count())
-
-    val lr = new LogisticRegression()
-      .setMaxIter(10)
-      .setRegParam(0.3)
-      .setElasticNetParam(0.8)
-      .setLabelCol(labelColumn)
-      .setFeaturesCol(featureColumn)
-
-    // Fit the model
-    val lrModel = lr.fit(trainDf)
-
-
-
-    val pmml = new PMMLBuilder(preprocessingDf.schema, lrModel).build()
-    JAXBUtil.marshalPMML(pmml, new StreamResult(System.out))
-
+  def metric(model: LogisticRegressionModel) = {
     // Print the coefficients and intercept for multinomial logistic regression
-    println(s"Coefficients: \n${lrModel.coefficientMatrix}")
-    println(s"Intercepts: \n${lrModel.interceptVector}")
+    println(s"Coefficients: \n${model.coefficientMatrix}")
+    println(s"Intercepts: \n${model.interceptVector}")
 
-    val trainingSummary = lrModel.summary
+    val trainingSummary = model.summary
 
     // Obtain the objective per iteration
     val objectiveHistory = trainingSummary.objectiveHistory
@@ -186,6 +142,47 @@ object App {
     val recall = trainingSummary.weightedRecall
     println(s"Accuracy: $accuracy\nFPR: $falsePositiveRate\nTPR: $truePositiveRate\n" +
       s"F-measure: $fMeasure\nPrecision: $precision\nRecall: $recall")
+
+  }
+
+
+  def run(options: AppOptions)(implicit spark: SparkSession): Unit = {
+    // spark.sparkContext.setLogLevel("ERROR")
+    val preprocessingDf = preprocessing(options.inputPath)
+    val cleanedColumns = preprocessingDf.columns
+
+    preprocessingDf.printSchema()
+    preprocessingDf.show(10, false)
+    print(preprocessingDf.count())
+
+    val fittedAssember = fitAssembler(preprocessingDf, cleanedColumns)
+
+
+    val df = fittedAssember.randomSplitAsList(Array(trainSplit, testSplit, hyperparameterSplit), seed = 42)
+    val trainDf = df.get(0).cache()
+    val testDf = df.get(1).cache()
+    val hyperparameterDf = df.get(2).cache()
+
+    println("total: " + preprocessingDf.count())
+    println("Train: " + trainDf.count())
+    println("Test: " + testDf.count())
+    println("Hyperparameter: " + hyperparameterDf.count())
+
+    val lr = new LogisticRegression()
+      .setMaxIter(10)
+      .setRegParam(0.3)
+      .setElasticNetParam(0.8)
+      .setLabelCol(labelColumn)
+      .setFeaturesCol(featureColumn)
+
+    // Fit the model
+    // val lrModel = lr.fit(trainDf)
+
+
+
+    //val pmml = new PMMLBuilder(preprocessingDf.schema, lrModel).build()
+    //JAXBUtil.marshalPMML(pmml, new StreamResult(System.out))
+
 
   }
 }
