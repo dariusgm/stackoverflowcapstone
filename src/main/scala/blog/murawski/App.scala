@@ -116,6 +116,7 @@ object App {
 
 
   def train(options: AppOptions)(implicit spark:SparkSession): Unit = {
+    println("Training")
     val dfs = spark
       .read
       .parquet("total.parquet")
@@ -134,6 +135,8 @@ object App {
       .setFeaturesCol(featureColumn)
 
     val lrModel = lr.fit(trainPair)
+
+    lrModel.save("model")
 
   }
 

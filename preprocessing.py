@@ -1,19 +1,21 @@
-import os
-import pandas as pd
-from config import config
-import json
 import csv
-import numpy as np
-import math
+import json
+import os
 
-def convert_to_json_by_column(input_path:str, output_path:str, column:str, process_cols:dict)-> None:
+import numpy as np
+
+from config import config
+
+
+def convert_to_json_by_column(input_path: str, output_path: str, column: str,
+                              process_cols: dict) -> None:
     '''
     Convert the content to several json files, splitted by the column name provided.
     
     '''
     with open(output_path, 'wt') as output_file:
         with open(input_path, 'rt') as csvfile:
-            file = csv.reader(csvfile, delimiter=',') 
+            file = csv.reader(csvfile, delimiter=',')
             for line_index, elements in enumerate(file):
                 if line_index == 0:
                     # we have the header already
@@ -26,17 +28,20 @@ def convert_to_json_by_column(input_path:str, output_path:str, column:str, proce
 
                 output_file.write(json.dumps(result_line) + '\n')
 
-def convert_to_json(input_path: str, output_path:str, leave_columns, numeric_columns) -> None:
-    '''
+
+def convert_to_json(input_path: str, output_path: str, leave_columns,
+                    numeric_columns) -> dict:
+    """
     Convert the content of a csv file to a json, creating a new column for each value found.
-    '''
+    """
     process_cols = {}
     with open(output_path, 'wt') as output_file:
         with open(input_path, 'rt') as csvfile:
             file = csv.reader(csvfile, delimiter=',')
-            for line_index, elements in enumerate(file) :
+            for line_index, elements in enumerate(file):
                 if line_index == 0:
-                    process_cols = extract_header(elements, leave_columns, numeric_columns)
+                    process_cols = extract_header(elements, leave_columns,
+                                                  numeric_columns)
                     continue
                 else:
                     # process all column, for spark
@@ -44,25 +49,31 @@ def convert_to_json(input_path: str, output_path:str, leave_columns, numeric_col
                     output_file.write(json.dumps(result_line) + '\n')
 
     return process_cols
-               
+
 
 def is_na(e):
     if type(e) == list:
         return all(lambda x: is_na(x), e)
-      # convert string "NA" to NA column
+    # convert string "NA" to NA column
     if type(e) == str and e == 'NA':
         return True
     # convert float na to NA column
     elif type(e) == float and np.isna(e):
         return True
-    return False 
+    return False
 
-def process_data(elements:list, process_cols:dict, column: str) -> dict:
+
+def process_data(elements: list, process_cols: dict, column: str) -> dict:
     result_line = {}
     for column_index, e in enumerate(elements):
-        column_meta_data = process_cols[column_index] 
-        action = column_meta_data['action'] 
+        column_meta_data = process_cols[column_index]
+        action = column_meta_data['action']
         name = column_meta_data['name']
+
+        # always pass Respondent id for later merging
+        if action == 'leave':
+            result_line[name] = e
+
         if column == None or name == column['name']:
             if (is_na(e)):
                 key = f"{name}_NA"
@@ -76,21 +87,22 @@ def process_data(elements:list, process_cols:dict, column: str) -> dict:
                     for nested_element in e.split(';'):
                         if (is_na(e)):
                             key = f"{name}_NA"
-                            result_line[key] = 1  
+                            result_line[key] = 1
                         else:
                             key = f"{name}_{nested_element}"
                             result_line[key] = 1
                 else:
                     key = f"{name}_{e}"
                     result_line[key] = 1
-            elif action == 'numeric' or  action == 'leave':
+            elif action == 'numeric':
                 key = f"{name}"
                 result_line[key] = e
 
-            
     return result_line
 
-def extract_header(elements:list, leave_cols:list, numeric_cols: list) -> dict:
+
+def extract_header(elements: list, leave_cols: list,
+                   numeric_cols: list) -> dict:
     process_cols = {}
     for column_index, e in enumerate(elements):
         if e in leave_cols:
@@ -99,7 +111,7 @@ def extract_header(elements:list, leave_cols:list, numeric_cols: list) -> dict:
             process_cols[column_index] = {'action': 'numeric', 'name': e}
         else:
             process_cols[column_index] = {'action': 'explode', 'name': e}
-            
+
     return process_cols
 
 
@@ -123,10 +135,13 @@ def main():
             # and for model buliding
             for column_index, column in cols_dict.items():
                 if column['name'] not in leave_columns:
-                    output_path = os.path.join("cache", f"{year}_{column['name']}.json")
+                    output_path = os.path.join("cache",
+                                               f"{year}_{column['name']}.json")
                     if not os.path.exists(output_path):
                         print(f"OUT: {output_path}")
-                        convert_to_json_by_column(data_path, output_path, column, cols_dict)
+                        convert_to_json_by_column(data_path, output_path,
+                                                  column, cols_dict)
+
 
 if __name__ == '__main__':
     main()
