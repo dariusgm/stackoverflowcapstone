@@ -17,7 +17,7 @@ SPARK_OPTIONS="--master yarn --deploy-mode cluster \
 --queue prd-etl --conf spark.dynamicAllocation.enabled=true \
 --conf spark.dynamicAllocation.initialExecutors=1 \
 --conf spark.dynamicAllocation.maxExecutors=10 \
---executor-memory 4g --conf spark.files.overwrite=true \
+--executor-memory 12g --conf spark.files.overwrite=true \
 --conf spark.executor.memoryOverhead=4g \
 --driver-memory 4g  --conf spark.shuffle.blockTransferService=nio \
 --conf spark.sql.warehouse.dir=./spark-warehouse --conf spark.eventLog.enabled=true \
