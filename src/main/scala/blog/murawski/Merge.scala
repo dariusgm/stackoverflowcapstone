@@ -1,10 +1,7 @@
 package blog.murawski
 
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}
-import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.apache.spark.sql.{SaveMode, SparkSession}
 
 
 object Merge {
@@ -39,7 +36,7 @@ object Merge {
       a.join(b, "Respondent")
     })
 
-    joined.drop("Respondent").write.mode(SaveMode.Overwrite).parquet("total.parquet")
+    joined.drop("Respondent").write.mode(SaveMode.Overwrite).parquet(options.outputPath + "/" + "total.parquet")
 
   }
 }
