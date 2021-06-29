@@ -1,10 +1,8 @@
 package blog.murawski
 
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.ml.classification.{LogisticRegression, LogisticRegressionModel}
-import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.apache.spark.sql.{SaveMode, SparkSession}
 
 
 object Preprocessing {
@@ -39,7 +37,7 @@ object Preprocessing {
 
   }
 
-  def columnPreprocessing(path: String, outputPath: String)(implicit spark: SparkSession) = {
+  private def columnPreprocessing(path: String, outputPath: String)(implicit spark: SparkSession) = {
     var df = spark
       .read
       .json(path)
@@ -58,7 +56,7 @@ object Preprocessing {
       .parquet(outputPath)
   }
 
-  def labelPreproccessing(path: String, outputPath: String)(implicit spark: SparkSession) = {
+  private def labelPreproccessing(path: String, outputPath: String)(implicit spark: SparkSession) = {
     var df = spark
       .read
       .json(path)
@@ -76,11 +74,6 @@ object Preprocessing {
       .parquet(outputPath)
   }
 
-  def fitAssembler(df: DataFrame, columns: Array[String]): DataFrame = {
-    new VectorAssembler().setInputCols(columns).setOutputCol(featureColumn).transform(df)
-  }
-
-
   def run(options: AppOptions)(implicit spark: SparkSession): Unit = {
     spark.sparkContext.setLogLevel("ERROR")
     val conf = spark.sparkContext.hadoopConfiguration
@@ -90,12 +83,13 @@ object Preprocessing {
     for (f <- files) {
       if (f.isFile) {
         val path = options.inputPath + "/" + f.getPath.getName
+        val outputPath = f.getPath.getName.replace(".json", ".parquet")
 
         println(path)
         if (path.contains(labelColumn)) {
-          labelPreproccessing(path, path + ".parquet")
+          labelPreproccessing(path, options.outputPath + "/" + outputPath)
         } else {
-          columnPreprocessing(path, path + ".parquet")
+          columnPreprocessing(path, options.outputPath + "/" + outputPath)
         }
       }
     }

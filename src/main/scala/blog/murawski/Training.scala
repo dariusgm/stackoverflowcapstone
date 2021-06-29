@@ -27,22 +27,17 @@ object Training {
   }
 
 
-
-
   def fitAssembler(df: DataFrame, columns: Array[String]): DataFrame = {
     new VectorAssembler().setInputCols(columns).setOutputCol(featureColumn).transform(df)
   }
 
-
-
   def run(options: AppOptions)(implicit spark: SparkSession): Unit = {
     spark.sparkContext.setLogLevel("ERROR")
-    println("Training")
-    val dfs = spark
-      .read
-      .parquet(options.inputPath + "/" + "total.parquet")
-      .randomSplitAsList(Array(trainSplit, testSplit, hyperparameterSplit), seed = 42)
 
+    val inputPath = options.inputPath
+    val df = spark.read.parquet(inputPath)
+
+    val dfs = df.randomSplitAsList(Array(trainSplit, testSplit, hyperparameterSplit), seed = 42)
     val trainDf = dfs.get(0).cache()
     val testDf = dfs.get(1).cache()
     val hyperparameterDf = dfs.get(2).cache()
@@ -57,8 +52,7 @@ object Training {
 
     val lrModel = lr.fit(trainPair)
 
-    lrModel.save(options.outputPath + "/" + "model")
+    lrModel.save(options.outputPath)
 
-    }
-
+  }
 }

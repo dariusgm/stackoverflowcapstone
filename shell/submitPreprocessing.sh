@@ -10,8 +10,8 @@
 
 set -e -x
 
-INPUT_PATH=${1}
-OUTPUT_PATH=${2}
+INPUT_PATH=${1:-"capstone"}
+OUTPUT_PATH=${2:-"capstone_preprocessing"}
 
 SPARK_OPTIONS="--master yarn --deploy-mode cluster \
 --queue prd-etl --conf spark.dynamicAllocation.enabled=true \
