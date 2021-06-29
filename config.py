@@ -1,6 +1,6 @@
 import os
 
-global config
+
 config = [
     # {
     #     'year': '2011',
@@ -78,7 +78,8 @@ config = [
         'unpack_path': os.path.join('data', 'unpack', '2020.zip'),
         'data_path': os.path.join('data', 'unpack', '2020.zip', 'survey_results_public.csv'),
         'json_path': os.path.join('2020.json'),
-        'numeric_columns': ['CompTotal','ConvertedComp', 'Age', 'Age1stCode', 'YearsCode', 'YearsCodePro', 'WorkWeekHrs'],
-        'leave_columns': ['Respondent']
+        'numeric_columns': ['ConvertedComp', 'Age', 'Age1stCode', 'YearsCode', 'YearsCodePro', 'WorkWeekHrs'],
+        'leave_columns': ['CompTotal']
+        #'leave_columns': ['Respondent', 'CompTotal']
     }
 ]

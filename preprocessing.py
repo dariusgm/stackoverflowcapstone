@@ -96,7 +96,15 @@ def process_data(elements: list, process_cols: dict, column: str) -> dict:
                     result_line[key] = 1
             elif action == 'numeric':
                 key = f"{name}"
-                result_line[key] = e
+                # handle "Younger than 5 years" answer for Age1Code
+                try:
+                    float(e)
+                    result_line[key] = e
+                except:
+                    key = f"{name}_{e}"
+                    result_line[key] = 1
+
+
 
     return result_line
 

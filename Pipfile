@@ -13,10 +13,13 @@ plotly = "*"
 joblib = "*"
 requests = "*"
 matplotlib = "*"
+tensorflow = "2.3"
+mlflow = "*"
+numpy = "*"
 
 
 [dev-packages]
 notebook = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.8"
