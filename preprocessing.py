@@ -3,7 +3,6 @@ import json
 import os
 
 import numpy as np
-
 from config import config
 
 
@@ -30,11 +29,13 @@ def convert_to_json_by_column(input_path: str, output_path: str, column: str,
 
 
 def convert_to_json(input_path: str, output_path: str, leave_columns,
-                    numeric_columns) -> dict:
+                    numeric_columns) -> (dict, dict):
     """
     Convert the content of a csv file to a json, creating a new column for each value found.
     """
     process_cols = {}
+    # required for scaling features
+    max_values = {}
     with open(output_path, 'wt') as output_file:
         with open(input_path, 'rt') as csvfile:
             file = csv.reader(csvfile, delimiter=',')
@@ -46,9 +47,14 @@ def convert_to_json(input_path: str, output_path: str, leave_columns,
                 else:
                     # process all column, for spark
                     result_line = process_data(elements, process_cols, None)
+                    for k, v in result_line.items():
+                        if k in max_values:
+                            max_values[k] = max(float(max_values[k]), float(v))
+                        else:
+                            max_values[k] = float(v)
                     output_file.write(json.dumps(result_line) + '\n')
 
-    return process_cols
+    return process_cols, max_values
 
 
 def is_na(e):
@@ -110,8 +116,6 @@ def process_data(elements: list, process_cols: dict, column: str) -> dict:
                     key = f"{name}_{e}"
                     result_line[key] = 1
 
-
-
     return result_line
 
 
@@ -139,12 +143,15 @@ def main():
             leave_columns = element['leave_columns']
             numeric_columns = element['numeric_columns']
             print(f"IN: {data_path}")
-            cols_dict = convert_to_json(
+            cols_dict, max_dict = convert_to_json(
                 input_path=data_path,
                 output_path=json_path,
                 leave_columns=leave_columns,
                 numeric_columns=numeric_columns
             )
+            with open("max.json", 'wt') as max_writer:
+                max_writer.write(json.dumps(max_dict, indent=4))
+
             # process by columns for visualtisation purpose
             # and for model buliding
             for column_index, column in cols_dict.items():
