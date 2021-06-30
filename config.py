@@ -79,7 +79,7 @@ config = [
         'data_path': os.path.join('data', 'unpack', '2020.zip', 'survey_results_public.csv'),
         'json_path': os.path.join('2020.json'),
         'numeric_columns': ['ConvertedComp', 'Age', 'Age1stCode', 'YearsCode', 'YearsCodePro', 'WorkWeekHrs'],
-        'leave_columns': ['CompTotal']
+        'leave_columns': ['CompTotal', 'Respondent']
         #'leave_columns': ['Respondent', 'CompTotal']
     }
 ]

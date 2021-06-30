@@ -71,8 +71,12 @@ def process_data(elements: list, process_cols: dict, column: str) -> dict:
         name = column_meta_data['name']
 
         # always pass Respondent id for later merging
+        # convert label to 0 in case it not exists, will be removed before training
         if action == 'leave':
-            result_line[name] = e
+            if e == 'NA':
+                result_line[name] = 0
+            else:
+                result_line[name] = e
 
         if column == None or name == column['name']:
             if (is_na(e)):
@@ -101,6 +105,8 @@ def process_data(elements: list, process_cols: dict, column: str) -> dict:
                     float(e)
                     result_line[key] = e
                 except:
+                    if (e == 'NA'):
+                        print("a")
                     key = f"{name}_{e}"
                     result_line[key] = 1
 
