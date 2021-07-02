@@ -134,7 +134,6 @@ def extract_header(elements: list, leave_cols: list,
 
 
 def main():
-    os.makedirs('cache', exist_ok=True)
     for element in config:
         if 'leave_columns' in element:
             year = element['year']

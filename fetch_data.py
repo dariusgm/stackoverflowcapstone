@@ -32,7 +32,6 @@ def unpack():
             print(f"direcory {unpack_path} exists, skipping")
 
 def main():
-    os.makedirs(os.path.join('data', 'unpack'), exist_ok = True)
     fetch()
     unpack()
     print("done")
