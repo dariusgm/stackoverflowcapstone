@@ -15,9 +15,9 @@ def train_on_df(df, full:bool=False):
         epochs = 1
 
     # only use rows with label data
-    df = df[df['CompTotal'] > 0]
-    target = df['CompTotal']
-    df = df.drop(columns=['CompTotal', "Respondent"])
+    df = df[df['ConvertedComp'] > 0]
+    target = df['ConvertedComp']
+    df = df.drop(columns=['CompTotal', "Respondent", "ConvertedComp"])
     X_train, X_test, y_train, y_test = train_test_split(df, target,
                                                         test_size=0.2)
 

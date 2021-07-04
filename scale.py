@@ -3,15 +3,13 @@ import os
 
 
 def main():
-    os.makedirs("features", exist_ok=True)
-
-    with open("max.json", 'rt') as max_reader:
+    with open(os.path.join("data", "meta", "max.json"), 'rt') as max_reader:
         max_dict = json.loads(max_reader.read())
 
-    for f in os.listdir("cache"):
-        with open(f"features/{f}", 'wt') as writer:
+    for f in os.listdir(os.path.join("data", "preprocessing")):
+        with open(os.path.join("data", "features", f), 'wt') as writer:
             print(f)
-            with open(f"cache/{f}", 'rt') as reader:
+            with open(os.path.join("data", "preprocessing", f), 'rt') as reader:
                 for line in reader:
                     scaled = {}
                     data = json.loads(line)

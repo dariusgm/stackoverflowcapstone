@@ -5,10 +5,10 @@ def main():
     best_n = 15
     scores = []
 
-    for f in os.listdir("metrics"):
-        with open(f"metrics/{f}", 'rt') as reader:
+    for f in os.listdir(os.path.join("data", "metrics")):
+        with open(os.path.join("data", "metrics", f), 'rt') as reader:
             # this is not a helpful feature, as its acutally the same without converting to the label
-            if f != "2020_ConvertedComp":
+            if f != "2020_ConvertedComp" and  f != "2020_CompTotal":
                 data = json.loads(reader.read())
                 data["file"] = f
                 scores.append(data)
@@ -19,7 +19,8 @@ def main():
 
     result = {}
     for f in relevent_features:
-        with open(f"features/{f}", 'rt') as json_reader:
+        path = os.path.join("data", "features", f)
+        with open(path, 'rt') as json_reader:
             print(f"Merging {f}")
             for line in json_reader:
                 data = json.loads(line)
@@ -29,8 +30,9 @@ def main():
                 else:
                     result[key] = data
 
-    print("Writing all.json")
-    with open("all.json", 'wt') as writer:
+    print("Writing all_2020.json")
+
+    with open(os.path.join("data", "all_2020.json"), 'wt') as writer:
         for _respondent, v in result.items():
             data = json.dumps(v)
             writer.write(data + '\n')

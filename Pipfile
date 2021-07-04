@@ -5,16 +5,12 @@ name = "pypi"
 
 [packages]
 pandas = "*"
-SQLAlchemy = "*"
-nltk = "*"
 sklearn = "*"
-flask = "*"
 plotly = "*"
-joblib = "*"
 requests = "*"
 matplotlib = "*"
 tensorflow = "2.3"
-mlflow = "*"
+tensorflowjs = "*"
 numpy = "*"
 
 
@@ -22,4 +18,4 @@ numpy = "*"
 notebook = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

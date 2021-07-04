@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 def main():
     print("Training on best columns")
 
-    df = pd.read_json(f"all.json", dtype=float, lines=True).fillna(0)
+    df = pd.read_json(f"all_2020.json", dtype=float, lines=True).fillna(0)
     model, history = train_on_df(df, full=True)
 
     model.save("2020.model")

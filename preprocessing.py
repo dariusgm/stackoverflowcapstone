@@ -8,10 +8,10 @@ from config import config
 
 def convert_to_json_by_column(input_path: str, output_path: str, column: str,
                               process_cols: dict) -> None:
-    '''
+    """
     Convert the content to several json files, splitted by the column name provided.
-    
-    '''
+    """
+
     with open(output_path, 'wt') as output_file:
         with open(input_path, 'rt') as csvfile:
             file = csv.reader(csvfile, delimiter=',')
@@ -148,14 +148,14 @@ def main():
                 leave_columns=leave_columns,
                 numeric_columns=numeric_columns
             )
-            with open("max.json", 'wt') as max_writer:
+            with open(os.path.join("data", "meta", "max.json") , 'wt') as max_writer:
                 max_writer.write(json.dumps(max_dict, indent=4))
 
             # process by columns for visualtisation purpose
             # and for model buliding
             for column_index, column in cols_dict.items():
                 if column['name'] not in leave_columns:
-                    output_path = os.path.join("cache",
+                    output_path = os.path.join('data', 'preprocessing',
                                                f"{year}_{column['name']}.json")
                     if not os.path.exists(output_path):
                         print(f"OUT: {output_path}")

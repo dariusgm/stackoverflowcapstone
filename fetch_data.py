@@ -9,7 +9,7 @@ def fetch():
     for element in config:
         
         url = element['url']
-        local_path = element['local_path']
+        local_path = element['packed_path']
         # Inspired by https://365datascience.com/tutorials/python-tutorials/python-requests-package/
         if not os.path.exists(local_path):
             print(f"fetching {url}")
@@ -22,7 +22,7 @@ def fetch():
 
 def unpack():
     for element in config:
-        local_path = element['local_path']
+        local_path = element['packed_path']
         unpack_path = element['unpack_path']
         if not os.path.exists(unpack_path):
             print(f"unpacking {local_path}")
