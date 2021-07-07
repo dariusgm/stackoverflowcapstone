@@ -8,3 +8,4 @@ pipenv run python3 scale.py
 pipenv run python3 train_features.py
 pipenv run python3 select_features.py
 pipenv run python3 train_all.py
+pipenv run python3 template.py

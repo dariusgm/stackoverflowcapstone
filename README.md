@@ -21,7 +21,7 @@ pyenv local 3.9.2
 python3 -m pip install --upgrade pip
 pip install pipenv
 pyenv rehash
-pipenv install --dev --python 3.9.2
+pipenv install --dev --python 3.9.2 --skip-lock
 pipenv shell
 ```
 
