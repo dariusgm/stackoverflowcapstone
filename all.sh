@@ -9,3 +9,6 @@ pipenv run python3 train_features.py
 pipenv run python3 select_features.py
 pipenv run python3 train_all.py
 pipenv run python3 template.py
+curl https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js -o js/tf.min.js
+curl https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js.map -o js/tf.min.js.map
+

@@ -74,12 +74,48 @@ config = [
     {
         'year': '2020',
         'url': 'https://drive.google.com/uc?id=1dfGerWeWkcyQ9GX9x20rdSGj7WtEpzBB&export=download',
-        'packed_path': os.path.join('data','2020.zip'),
+        'packed_path': os.path.join('data', '2020.zip'),
         'unpack_path': os.path.join('data', 'unpack', '2020.zip'),
         'data_path': os.path.join('data', 'unpack', '2020.zip', 'survey_results_public.csv'),
         'json_path': os.path.join('data', '2020.json'),
         'numeric_columns': ['Age', 'Age1stCode', 'YearsCode', 'YearsCodePro', 'WorkWeekHrs'],
-        'leave_columns': ['CompTotal', 'Respondent', 'ConvertedComp']
+        'leave_columns': ['CompTotal', 'Respondent', 'ConvertedComp'],
+        # indicating that only one value can be picked
+        'exclusive_columns': [
+            'MainBranch',
+            'Hobbyist',
+            'CompFreq',
+            'Country',
+            'CurrencyDesc',
+            'CurrencySymbol',
+            'EdLevel',
+            'Employment',
+            'Ethnicity',
+            'JobSat',
+            'JobSeek',
+            'NEWDevOps',
+            'NEWDevOpsImpt',
+            'NEWEdImpt',
+            'NEWLearn',
+            'NEWOffTopic',
+            'NEWOnboardGood',
+            'NEWOtherComms',
+            'NEWOvertime',
+            'NEWPurpleLink',
+            'OpSys',
+            'OrgSize',
+            'PurchaseWhat',
+            'SOAccount',
+            'SOComm',
+            'SOPartFreq',
+            'SOVisitFreq',
+            'SurveyEase',
+            'SurveyLength',
+            'Trans',
+            'UndergradMajor',
+            'WelcomeChange'
+
+        ]
         #'leave_columns': ['Respondent', 'CompTotal']
     }
 ]

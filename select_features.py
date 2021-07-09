@@ -8,7 +8,7 @@ def main():
     for f in os.listdir(os.path.join("data", "metrics")):
         with open(os.path.join("data", "metrics", f), 'rt') as reader:
             # this is not a helpful feature, as its acutally the same without converting to the label
-            if f != "2020_ConvertedComp" and  f != "2020_CompTotal":
+            if f != "2020_ConvertedComp" and f != "2020_CompTotal":
                 data = json.loads(reader.read())
                 data["file"] = f
                 scores.append(data)
