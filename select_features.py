@@ -15,10 +15,10 @@ def main():
 
 
     newlist = sorted(scores, key=lambda k: k['val_mean_squared_error'])
-    relevent_features = map(lambda x: x['file'], newlist[0:best_n+1])
+    relevant_features = map(lambda x: x['file'], newlist[0:best_n+1])
 
     result = {}
-    for f in relevent_features:
+    for f in relevant_features:
         path = os.path.join("data", "features", f)
         with open(path, 'rt') as json_reader:
             print(f"Merging {f}")
@@ -29,8 +29,6 @@ def main():
                     result[key] = {**result[key], **data}
                 else:
                     result[key] = data
-
-    print("Writing all_2020.json")
 
     with open(os.path.join("data", "all_2020.json"), 'wt') as writer:
         for _respondent, v in result.items():
