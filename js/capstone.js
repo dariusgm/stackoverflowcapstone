@@ -1,3 +1,10 @@
+function rescaleFeature(feature, value) {
+    return value / window.config.max_dict[feature]
+}
+
+function rescaleTarget(feature, value) {
+    return value * window.config.max_dict[feature]
+}
 
 function buttonClicked(e) {
     e.preventDefault()
@@ -25,10 +32,30 @@ function buttonClicked(e) {
         }
     }
 
+    // get value if selected, and allow resetting of checkbox
+    var reset = [];
+    var inputs = document.getElementsByTagName("input")
+    for (var i = 0; i < inputs.length; i++) {
+        var element = inputs[i]
+        if (element.type === 'text') {
+            var key = element.name.split("-")[0]
+            var value = parseInt(element.value)
+            var index = features.indexOf(key)
+
+            // given not used any value input field, set the feature to 0
+            if (isNaN(value)) {
+                rawArray[index] = 0
+            } else {
+                reset.push(key)
+                rawArray[index] = rescaleFeature(key, value)
+            }
+        }
+    }
+
     // fill selected features with checkbox
-    var checkboxes = document.getElementsByTagName("input")
-    for (var i = 0; i < checkboxes.length; i++) {
-        var element = checkboxes[i]
+    var inputs = document.getElementsByTagName("input")
+    for (var i = 0; i < inputs.length; i++) {
+        var element = inputs[i]
         if (element.type === 'checkbox' && element.checked) {
             var key = element.getAttribute("id")
             var value = element.value
@@ -37,17 +64,26 @@ function buttonClicked(e) {
             if (index == -1) {
                 console.log("Feature not found")
             } else {
-                rawTensor[index] = 1
+                if (reset.includes(key)) {
+                    element.checked = false
+                    rawArray[index] = 0
+                    console.log("Feature resetted")
+                } else {
+                    rawArray[index] = 1
+                }
             }
         }
     }
 
     var tensor = tf.tensor(rawArray, shape=[1, features.length])
-    var prediction = model.predict(tensor)
-    console.log(prediction)
-
-
-
+    model.predict(tensor).data().then(function (e) {
+        var scaledPrediction = rescaleTarget("ConvertedComp", e)
+        if (scaledPrediction < 0) {
+            alert("No Prediciton possible given the input data. Think you found a bug? Please write :-)")
+        } else {
+            alert("Your Prediction: " + Math.floor(scaledPrediction) + " USD per Year ")
+        }
+    })
 }
 
 function registerEventHandler(e) {
