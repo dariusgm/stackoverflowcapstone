@@ -39,7 +39,7 @@ select_option_template = Template('<option value="$value">$value</option>')
 select_end_template = Template('</select></fieldset>')
 
 
-footer = Template('<button id="submit2">Submit</button></html>')
+footer = Template('<button id="submit">Submit</button></html>')
 
 def render_checkbox(key, values, description, numeric):
     html = group_header.substitute(group=key, description=description)

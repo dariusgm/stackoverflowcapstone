@@ -10,8 +10,6 @@ import tensorflowjs as tfjs
 
 
 def main():
-    print("Training on best columns")
-
     df = pd.read_json(os.path.join("data", "all_2020.json"), dtype=float,
                       lines=True).fillna(0)
     model, history, columns = train_on_df(df, full=True)
