@@ -23,7 +23,7 @@ header = Template('<html><head><title>Stackoveflow capstone project by Darius '
                   '<br />')
 
 
-group_header = Template('<div>$group</div><div>$description</div>')
+group_header = Template('<h4>$group</h4><div>$description</div>')
 
 checkbox_start_template = Template("<fieldset>")
 checkbox_value_template = Template('<div>'
