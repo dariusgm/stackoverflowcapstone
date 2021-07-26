@@ -82,8 +82,6 @@ config = [
         'leave_columns': ['CompTotal', 'Respondent', 'ConvertedComp'],
         # indicating that only one value can be picked
         'exclusive_columns': [
-            'MainBranch',
-            'Hobbyist',
             'CompFreq',
             'Country',
             'CurrencyDesc',
@@ -91,8 +89,10 @@ config = [
             'EdLevel',
             'Employment',
             'Ethnicity',
+            'Hobbyist',
             'JobSat',
             'JobSeek',
+            'MainBranch',
             'NEWDevOps',
             'NEWDevOpsImpt',
             'NEWEdImpt',
@@ -102,9 +102,11 @@ config = [
             'NEWOtherComms',
             'NEWOvertime',
             'NEWPurpleLink',
+            'NEWSOSites',
             'OpSys',
             'OrgSize',
             'PurchaseWhat',
+            'Sexuality',
             'SOAccount',
             'SOComm',
             'SOPartFreq',
@@ -114,7 +116,6 @@ config = [
             'Trans',
             'UndergradMajor',
             'WelcomeChange'
-
         ]
         #'leave_columns': ['Respondent', 'CompTotal']
     }
