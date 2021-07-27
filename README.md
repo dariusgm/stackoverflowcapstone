@@ -1,55 +1,66 @@
-# stackoverflow capstone project
+# Hi!
 
-This project contains code for my solution for the "capstone" project at he nanodegree of udacity, data science.
+Welcome to my second capstone project. I generated predictions for job salary based on survey data from stack overflow 2020. You can find the analysis in notebook.ipynb.
+
+
+If you would like to rebuild the results by yourself, I provided a `Pipfile` with the libs you need.
+
+The code was running on an older mac or on ubuntu - windows may not work.
+
+
 
 # Fetching Repository
 
-```
+```bash
 git clone https://github.com/dariusgm/stackoverflowcapstone 
 ```
 
+# Installation
+## Native
 
-# Installation Native
 
-You can install a webserver in case you want to play around with the code and add external resources to it. When you want to use python:
+Install `pyenv` on your platform, see: https://github.com/pyenv/pyenv
 
-Install pyenv on your platform, see: https://github.com/pyenv/pyenv
 
-```
+```bash
 pyenv install 3.9.2
 pyenv local 3.9.2
 python3 -m pip install --upgrade pip
 pip install pipenv
 pyenv rehash
+echo "installing, this may take some time..."
 pipenv install --dev --python 3.9.2 --skip-lock
-pipenv shell
 ```
 
-# Stackoverflow Capstone Project
+## Using Docker
 
-
-
-### Instructions:
-1. Run the following commands in the project's root directory to set up everything.
-	
 ```bash
-all.sh
+sudo docker build -t stackoverflowcapstone .
+
+
 ```
+--mount type=bind,source="$(pwd)",target=/app .
 
-This will do the entire processing of the data, allowing you to serve the trained model using localhost:8000
 
-2. Run the following command in the app's directory to run your web app.
-    `pipenv run python3 -m http.server 8080 --bind localhost`
+# Pipeline
+In case you want to run the entire pipeline by yourself, just execute `all.sh` in the project root and be a bit patient - it should be done in about 30 minutes. At the end, it will start a local webserver that serve the trained model in a web app.
 
-3. Go to http://localhost:8080/
-4. Here you can do predictions using the created model and the input you provide for the features
-5. If you are interested in the analysis, run `pipenv run jupyter-notebook` and open `analysis.ipynb`. 
-   You can inspect the output directly using a normal html browser by opening `analysis.html`.
+# Serving
+## Native
+
+In case you want to just serve the model locally, use the build-in python webserver:
+`pipenv run python3 -m http.server 8080 --bind localhost`
+[http://localhost:8080](http://localhost:8080)
+
+
+## Using Docker
+
+   
 
 ## Repository Structure
 
 Most of the directories will be created while processing, so the (current) view may look different from the provided structure here
-```
+```bash
 ├── data
 │   ├── features - Contains files where each feature (group may be a better name) is stored
 │   ├── meta     - Meta Information on the data
