@@ -37,7 +37,6 @@ def build_and_compile_model():
     ])
 
     model.compile(loss=tf.keras.losses.MeanSquaredError(),
-                  # optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
                   optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
                   metrics=[tf.keras.metrics.MeanSquaredError(),
                            tf.keras.metrics.MeanAbsoluteError()])

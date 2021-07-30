@@ -93,7 +93,7 @@ Most of the directories will be created while processing, so the (current) view 
 ├── .python-version             - sets the python version for pyenv
 ├── all.sh                      - run the entire pipeline (in the correct order) for create a model and serve the app
 ├── analysis.html               - html version of analysis.ipynb
-├── analysis.ipynb              - analysis code for plots and some insides
+├── analysis.ipynb              - report and analysis code for plots and some insides
 ├── blog.py                     - convert the index.html to a format that can be included in the pelican based blog
 ├── blog_copy.py                - copy required data for the blog to the correct place for serving by the blog
 ├── capstone.html               - converted index.html file to make it compatible for pelican blog

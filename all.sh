@@ -25,10 +25,12 @@ echo "Fetching tensorflow js"
 curl https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js -o js/tf.min.js
 curl https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js.map -o js/tf.min.js.map
 
-echo "adjusting index.html for blog integration"
+echo "adjusting index.html for private blog integration"
 pipenv run python3 blog.py
 # this is just do get the data into the blog, as the blog is (currently) a private repository
 echo "copy files for blog integration"
 pipenv run python3 blog_copy.py
 echo "Done, serving app on localhost:8080"
 pipenv run python3 -m http.server 8080 --bind localhost
+# for generating analysis.html
+# pipenv run jupyter nbconvert --execute --to html analysis.ipynb
