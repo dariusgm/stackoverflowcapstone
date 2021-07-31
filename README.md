@@ -1,13 +1,26 @@
 # Hi!
 
-Welcome to my second capstone project. I generated predictions for job salary based on survey data from stack overflow 2020. You can find the analysis in notebook.ipynb.
+Welcome to my second capstone project. I generated predictions for job salary based on survey data from stack overflow 2020. 
+You can find the project definition, analysis and conclusions in **analysis.ipynb** (or analysis.html).
 
 
 If you would like to rebuild the results by yourself, I provided a `Pipfile` with the libs you need.
 
-The code was running on an older mac or on ubuntu - windows may not work.
+The code was tested on an older mac and on ubuntu - windows may not work.
 
+# Used Libraries
 
+* pandas: for general data manipulation 
+* sklearn: for train/test split
+* plotly: for plotting
+* requests: for fetching the data
+* matplotlib: for plotting as well
+* tensorflow: for building the model (using keras api)
+* tensorflowjs: for converting the model for a web app
+* numpy: for misc statistics
+
+# Motivation
+Job salary is always a topic in any company. Finding more neutral sources for comparing salaries is a huge positive impact for next interview or salary increase meetings. 
 
 # Fetching Repository
 
@@ -32,16 +45,6 @@ echo "installing, this may take some time..."
 pipenv install --dev --python 3.9.2 --skip-lock
 ```
 
-## Using Docker
-
-```bash
-sudo docker build -t stackoverflowcapstone .
-
-
-```
---mount type=bind,source="$(pwd)",target=/app .
-
-
 # Pipeline
 In case you want to run the entire pipeline by yourself, just execute `all.sh` in the project root and be a bit patient - it should be done in about 30 minutes. At the end, it will start a local webserver that serve the trained model in a web app.
 
@@ -53,9 +56,6 @@ In case you want to just serve the model locally, use the build-in python webser
 [http://localhost:8080](http://localhost:8080)
 
 
-## Using Docker
-
-   
 
 ## Repository Structure
 
