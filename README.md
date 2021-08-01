@@ -36,13 +36,13 @@ Install `pyenv` on your platform, see: https://github.com/pyenv/pyenv
 
 
 ```bash
-pyenv install 3.9.2
-pyenv local 3.9.2
+pyenv install 3.8.8
+pyenv local 3.8.8
 python3 -m pip install --upgrade pip
 pip install pipenv
 pyenv rehash
 echo "installing, this may take some time..."
-pipenv install --dev --python 3.9.2 --skip-lock
+pipenv install --dev --python 3.8.8 --skip-lock
 ```
 
 # Pipeline
