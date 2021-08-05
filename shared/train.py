@@ -22,7 +22,7 @@ def train_splitted(train: pd.DataFrame, test: pd.DataFrame):
 
     history = model.fit(X_train.values, y_train.values,
                         verbose=0,
-                        epochs=3, batch_size=32,
+                        epochs=3, batch_size=1,
                         validation_data=(X_test, y_test))
     return model, history, list(X_train.columns)
 
@@ -36,8 +36,8 @@ def train_on_df(df):
     model = build_and_compile_model()
 
     history = model.fit(X_train.values, y_train.values,
-                        verbose=1,
-                        epochs=1, batch_size=2,
+                        verbose=0,
+                        epochs=1, batch_size=1,
                         validation_data=(X_test, y_test))
     return model, history, list(df.columns)
 

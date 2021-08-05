@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 def main():
     print("Training Features")
     for f in os.listdir(os.path.join("data", "features")):
+        print(f)
         df = pd.read_json(os.path.join("data", "features", f), dtype=float, lines=True).fillna(0)
         _model, history, _columns = train_on_df(df)
 

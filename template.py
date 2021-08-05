@@ -17,8 +17,8 @@ header = Template('<html><head><title>Stackoveflow capstone project by Darius '
                   '<script src="js/capstone.js"></script>\n'
                   '</head>'
                   '<body>Welcome to your salary prediction. '
-                  'This data is based on the stackoverflow survey of 2020'
-                  'if you are interested in the source code, stay tuned!\ns'
+                  'This data is based on the stackoverflow survey of 2020 - '
+                  'If you are interested in the source code, stay tuned!\n'
                   'Pick <b>NA</b> when you don\'t want to give an answer'
                   '<br />')
 
